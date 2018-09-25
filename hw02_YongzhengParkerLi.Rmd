@@ -1,0 +1,126 @@
+---
+title: "hw02_YongzhengParkerLi"
+author: "Yongzheng Parker Li"
+date: "9/24/2018"
+output: github_document
+---
+
+This is the *Homework 02* of the course STAT545A, taught by [Vincenzo Coia](https://github.com/vincenzocoia) at the University of British Columbia (UBC). The detailed requirements of this assignment could be found [here](http://stat545.com/Classroom/assignments/hw02/hw02.html). The STAT545A course page is [here](http://stat545.com/Classroom/). My participation repository is [here](https://github.com/ParkerLi/STAT545_participation).
+
+# Bring rectangular data in
+
+This section installs the related packages for this assignment.
+
+```{r 00_package_install, message=F, warning=F}
+library(gapminder)
+library(tidyverse)
+library(gmodels)
+```
+
+# Smell test the data  
+
+This section explores the *gapminder* object. 
+
+The first code chunk checks if it is a data frame, and the answer is yes. Both *exists* and *class* function suffice the purpose.
+
+```{r 01_dataframe, message=F, warning=F}
+exists("gapminder") #check if it is a data frame
+class(gapminder)
+```
+
+The following subsection showcases the number of variables/columns (answer:6) and the number of rows/observations (answer: 1704). 
+
+```{r 02_column_row_00, warning=F, message=F}
+ncol(gapminder) #check the number of columns
+nrow(gapminder) #check the number of rows
+```
+
+*Head* function could also demonstrate the number of columns. It is a better choice when people want to take a quick look at the data. The easiest way, however, is to use the *dim* function, which gives the number of rows and columns at the same time.
+
+```{r 03_column_row_01, warning=F,message=F}
+head(gapminder) #check the number of columns and have a quick look at the data
+dim(gapminder) #check the number of columns and rows at the same time
+```
+
+*Str* shows the data type of each variable.
+
+```{r 04_datatype, warning=F, message=F}
+str(gapminder)
+```
+
+*Country* and *continent* are *factor*; *year* and *pop* are *integer*; *lifeExp* and *gdpPercap* are *number*.  
+
+# Explore individual variables  
+
+**Categorical variable**: *continent*
+
+```{r 05_categorical, warning=F,message=F}
+summary(gapminder$continent)
+```
+
+The result shows that there are five continents--Africa, Americas, Asia, Europe, and Oceania--in the dataset. The most common one is Africa (624 observations), while the least common one is Oceania (24 observations). 
+
+**Quantitative variable**: *lifeExp*
+
+```{r 06_quan, warning=F, message=F}
+summary(gapminder$lifeExp)
+ggplot(gapminder,aes(lifeExp)) +
+  geom_density(fill="orange") +
+  geom_histogram(aes(y=..density..), fill="blue", alpha=0.5)
+```
+
+The result shows that, for *lifeExp*, the minimum is 23.60, the maximum is 82.60, the average is 59.47, and some other info. To make it vivid, above also shows the histogram-density-combined graph.
+
+# Explore various plot types
+
+The plot above is a plot of one quantitative variable. This section makes a few more plots for people to have a better understanding of the data distribution.
+
+```{r 07_plot_00, warning=F, message=F}
+ggplot(gapminder,aes(x=lifeExp, y=log(gdpPercap))) + 
+  geom_point() #scatter plot
+```
+
+The scatterplot above is the scatterplot of *lifeExp* and *gdpPercap* (log). We can also scale the latter variable to log10 value. There is a positive correlation between these two variables.
+
+```{r 08_plot_01, warning=F, message=F}
+a <- ggplot(gapminder, aes(continent, pop)) +
+  scale_y_log10()
+a + geom_boxplot() + geom_violin(alpha=0.25)
+```
+
+This plot is the box-violin-combined plot between *continent* and *pop* (log10). We can see that the population distribution in each continent is different. For instance, distribution in Aisa is more normal-like.
+
+# Use <code>filter()</code>, <code>select()</code>, and <code>%>%</code>  
+
+This section utilizes <code>filter()</code> to create data subsets that I want to plot. I also practice piping together <code>filter()</code> and <code>select()</code> into <code>ggplot</code>. Piping syntax could simplify the coding process and make it more reader-friendly.
+
+```{r 09_piping_00, warning=F, message=F}
+gapminder %>% 
+  filter(country == "Canada") %>% 
+  ggplot(aes(year, lifeExp)) + 
+  geom_line() +
+  geom_point()
+```
+
+This graph shows the year-lifeExp point-line for Canada. We can tell that the *lifeExp* in Canada increases along the *year*.
+
+```{r 09_piping_01, warning=F, message=F}
+gapminder %>% 
+  filter(year == 2007) %>% 
+  ggplot(aes(continent, pop)) +
+  scale_y_log10() +
+  geom_boxplot() +
+  geom_violin(alpha=0.5)
+```
+
+This graph shows the continent-pop box-violin-combined plot in 2007. We can compare this with the overall box-violin graph above, and it seems the difference is small in 2007.
+
+```{r 10_piping_02, warning=F,message=F}
+gapminder %>% 
+  filter(continent == "Asia") %>% 
+  ggplot(aes(lifeExp))+
+  geom_density(fill="orange") +
+  geom_histogram(aes(y=..density..), fill="blue", alpha=0.5,bins=10)
+```
+
+This graph shows the hist-density plot of *lifeExp* in Asia. We can see the average in Aisa is quite high, and it has a relative long left-tail.
